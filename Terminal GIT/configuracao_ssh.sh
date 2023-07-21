@@ -8,7 +8,7 @@ git config --global user.email $EMAIL
 
 ssh-keygen -t ed25519 -C $EMAIL -q -N ''
 
-ssh-keygen -t ed25519 -l -q
+cp $USERPROFILE/.ssh/id_ed25519.pub $USERPROFILE/Desktop/chave_GitHub.txt 
 
 read -p "Para sair pressione Enter"
 
