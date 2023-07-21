@@ -1,0 +1,4 @@
+*.exe
+!gsr_designer.exe
+*.conf
+siap_sys.dll
