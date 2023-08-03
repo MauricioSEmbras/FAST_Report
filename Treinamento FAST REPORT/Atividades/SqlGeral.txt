@@ -1,0 +1,66 @@
+  SELECT distinct gest.id												as estab_id
+     , SUBSTRING (gest.nr_inscricao from 1 for 2)||'.'||SUBSTRING (gest.nr_inscricao from 3 for 3)||'.'||SUBSTRING (gest.nr_inscricao from 6 for 3)||'/'||SUBSTRING (gest.nr_inscricao from 9 for 4)||'-'||SUBSTRING (gest.nr_inscricao from 13 for 2)  	  	as estab_cnpj
+     , gest.descricao 									    as estab_descricao
+     , grdf.nome_declarante									as estab_fantasia 
+     , grdf.nome_responsavel								as estab_responsavel
+	    , cast( upper( coalesce( coalesce( trim(stpl.ds_tp_logradouro),'') ||' '||
+                                        trim(send.ds_logradouro   )     ||' - '||
+                                        trim(send.nr_endereco     )               
+                            , clie.endereco 									 ) ) as varchar(100) ) estab_endereco                            
+	    , cast( upper( coalesce( trim(smun.ds_municipio)       ||' - '||
+                              trim(sest.uf)          
+                            , trim(amun.nome_municipio),'') ||' - '||
+                              trim(amun.uf) 									   ) as varchar(100) ) estab_municipio                       
+     , coalesce(grdf.telefone_responsavel,clie.telefone)	as estab_resp_telefone
+
+     , SUBSTRING (gcpf.c031 from 1 for 3)||'.'||SUBSTRING (gcpf.c031 from 4 for 3)||'.'||SUBSTRING (gcpf.c031 from 7 for 3)||'-'||SUBSTRING (gcpf.c031 from 10 for 2)		as func_cpf     
+     , gcpf.c001 											as func_nome			     
+     , gcpf.c146 											as func_processo
+  	  , gcpf.c147 											as func_natureza
+  	  , gcpf.c148 											as func_qtde_meses     
+     , gcpf.c031										 	as func_cpf_param	
+     
+     , case 
+          when :imp_cpf = 1 then (
+            		 		      select cast(string_agg(distinct cast(gcpf2.c000 as varchar(20)), ', ') as varchar(20)) 
+                                  from grh_cadastro_funcionarios gcpf2 
+                                  where gcpf2.c031 = :cpf_func 
+                                  	and gcpf2.c998  = :estab_id
+                                    and exists ( select 1
+                                                 from grh_demonstrativo x
+                                                 where x.competencia  >= :ano || '01'
+                                                 	and x.competencia <= :ano || '13'
+                                                 	and x.suplementar  = 105
+                                                 	and x.matricula    = gcpf2.c000 
+                                                 limit 1 )
+          						 ) 
+          else cast(string_agg(distinct cast(gcpf.c000 as varchar(20)), ', ') as varchar(20)) end as funcionario_matricula2  
+     , cast(string_agg(distinct cast(gcpf.c000 as varchar(20)), ', ') as varchar(20)) as funcionario_matricula                          
+  from grh_cadastro_funcionarios gmat
+		     left join grh_cadastro_funcionarios gcpf on gcpf.c000     = gmat.c000    
+       left join grh_es_estabelecimentos   gest on gest.id   				= gcpf.c998
+       left join grh_es_empregador		   gemp on gemp.id				      	= gest.id_empregador
+       left join grh_remessa_fixo_dirf	   grdf	on grdf.inscricao = gest.nr_inscricao
+       left join sis_pessoa				   spes	on spes.documento		      	= gest.nr_inscricao and spes.id_tp_entidade = 1
+       left join sis_pessoa				   spem	on spem.documento			      = gemp.nr_inscricao and spem.id_tp_entidade = 1       
+       left join sis_endereco			   send on send.id_pessoa			     = coalesce(spes.id_pessoa, spem.id_pessoa)
+                                        and send.principal       = 1	
+   	   left	join sis_tp_logradouro	stpl	on stpl.id_tp_logradouro	= send.id_tp_logradouro
+       left join sis_municipio    smun on smun.id_municipio	    	= send.id_municipio
+       left join sis_estado				   sest on sest.id_estado			      = smun.id_estado			
+       
+	      left join aac_clientes			  clie on                      1 = 1		                            
+       left join aac_municipios			amun	on amun.codigo_municipio	 = clie.codigo_municipio
+                                                                                                                          
+
+   where ( gmat.c000 =  :chapas )                                                                                         
+   and exists ( select 1
+                  from grh_demonstrativo x
+                 where x.competencia >= :ano || '01'
+                   and x.competencia <= :ano || '13'
+                   and x.suplementar  = 105
+                   and x.matricula    = gcpf.c000 
+                 limit 1 )
+ group by 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14                    
+                    
+ order by 2, 9
