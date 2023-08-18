@@ -1,0 +1,95 @@
+select
+VALOR_11
+,VALOR_12
+,VALOR_13
+,VALOR_14
+,VALOR_15
+,VALOR_16                    
+,VALOR_21
+,VALOR_22
+,VALOR_23
+,VALOR_24
+,VALOR_25
+,VALOR_27
+,VALOR_28                      
+,VALOR_29
+,VALOR_31
+,VALOR_32
+,VALOR_33
+,VALOR_41
+,VALOR_42
+,VALOR_43
+,VALOR_44
+,VALOR_45
+,VALOR_46
+
+
+FROM (
+select
+  
+  sum(case 
+        when (a.conta=12) then 
+        (case when (substring(a.competencia from 5 for 2) =  '13') 
+         then case 
+              when (a.valor  > 0) then a.valor + coalesce(( select x.valor * -1 from  GRH_MOVIMENTOS x where  (x.competencia = :ano || '13') and  (x.suplementar = 105) and  (x.chapa = a.chapa) and  (x.conta = 5) ),0.00) else a.valor end
+              else 0.00 end) 
+      else 0.00 end) as VALOR_31,
+  sum((case when (substring(a.competencia from 5 for 2) = '13' and a.conta=4)
+            then coalesce(a.valor,0) else 0 end)) AS VALOR_32,
+  sum((case when (substring(a.competencia from 5 for 2) <> '13' and a.conta=13)
+            then coalesce(a.valor,0) else 0 end)) AS VALOR_33,
+  sum((case when (substring(a.competencia from 5 for 2) <> '13' and a.conta=7)
+            then coalesce(a.valor,0) else 0 end)) AS VALOR_21,
+  sum((case when (substring(a.competencia from 5 for 2) = '13' and a.conta=7)
+            then coalesce(a.valor,0) else 0 end)) AS VALOR_22,
+  sum((case when (b.numero_conta = 9)
+            then coalesce(a.valor,0.00) else 0.00 end)) AS VALOR_24,      
+  sum((case when (substring(a.competencia from 5 for 2) <> '13' and a.conta=1)
+            then coalesce(a.valor,0.00) else 0.00 end)) AS VALOR_11,
+  sum((case when (substring(a.competencia from 5 for 2) <> '13' and a.conta=2)
+            then coalesce(a.valor,0) else 0 end)) AS VALOR_12,
+  sum((case when (substring(a.competencia from 5 for 2) <> '13' and a.conta=4)
+            then coalesce(a.valor,0) else 0 end)) AS VALOR_15,
+  sum((case when (substring(a.competencia from 5 for 2) <> '13' and a.conta=5)
+            then coalesce(a.valor,0) else 0 end)) AS VALOR_16,                    
+  sum((case when (substring(a.competencia from 5 for 2) <> '13' and a.conta=25)
+            then coalesce(a.valor,0) else 0 end)) AS VALOR_13,
+  sum((case when (substring(a.competencia from 5 for 2) <> '13' and a.conta=3)
+            then coalesce(a.valor,0) else 0 end)) AS VALOR_14,
+  sum((case when (substring(a.competencia from 5 for 2) <> '13' and a.conta=8)
+            then coalesce(a.valor,0) else 0 end)) AS VALOR_23,
+  sum((case when (substring(a.competencia from 5 for 2) <> '13' and a.conta=10)
+            then coalesce(a.valor,0) else 0 end)) AS VALOR_25,
+  sum((case when (substring(a.competencia from 5 for 2) <> '13' and a.conta=42)
+            then coalesce(a.valor,0) else 0 end)) AS VALOR_27,
+  sum((case when (substring(a.competencia from 5 for 2) <> '13' and a.conta=43)
+            then coalesce(a.valor,0) else 0 end)) AS VALOR_28,                    
+  sum((case when (substring(a.competencia from 5 for 2) <> '13' and a.conta=11)
+            then coalesce(a.valor,0) else 0 end)) AS VALOR_29,
+  sum((case when (substring(a.competencia from 5 for 2) <> '13' and a.conta=35)
+            then coalesce(a.valor,0) else 0 end)) AS VALOR_41,
+  sum((case when (substring(a.competencia from 5 for 2) <> '13' and a.conta=36)
+            then coalesce(a.valor,0) else 0 end)) AS VALOR_42,
+  sum((case when (substring(a.competencia from 5 for 2) <> '13' and a.conta=37)
+            then coalesce(a.valor,0) else 0 end)) AS VALOR_43,
+  sum((case when (substring(a.competencia from 5 for 2) <> '13' and a.conta=38)
+            then coalesce(a.valor,0) else 0 end)) AS VALOR_44,
+  sum((case when (substring(a.competencia from 5 for 2) <> '13' and a.conta=39)
+            then coalesce(a.valor,0) else 0 end)) AS VALOR_45,
+  sum((case when (substring(a.competencia from 5 for 2) <> '13' and a.conta=40)
+            then coalesce(a.valor,0) else 0 end)) AS VALOR_46
+               
+           from grh_cadastro_funcionarios gcpf
+                inner join grh_movimentos     a on a.chapa        = gcpf.c000
+                                               and a.competencia >= :ano || '00'  
+                                               and a.competencia <= :ano || '13'    
+                                               and a.suplementar  = 105 
+                                               and a.conta in (1,2,3,4,5,6,7,8,9,10,11,12,13,20,21,22,23,25,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46)
+                left join grh_plano_contas    b on b.numero_conta = a.conta
+          where gcpf.c031 = :func_cpf_param   
+            and gcpf.c998 = :estab_id                    
+            and ( ( 1     = :imp_cpf ) or
+                  ( 0     = :imp_cpf and gcpf.c000 = :funcionario_matricula  ) )     
+          group by gcpf.c998,  gcpf.c031            
+          --order by 2, 1
+) ir

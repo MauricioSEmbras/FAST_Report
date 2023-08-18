@@ -1,0 +1,10 @@
+select
+ udf_strzero(extract(day from CAST(ADE.data AS TIMESTAMP)), 2) || '/' || udf_strzero(extract(month from CAST(ADE.data AS TIMESTAMP)), 2) ||'/' || udf_strzero(udf_int(extract(year from CAST(ADE.data AS TIMESTAMP))), 4) as DATA,
+	udf_strzero(extract(hour from CAST(ADE.data AS TIMESTAMP)), 2) || ':' || udf_strzero(extract(minute from CAST(ADE.data AS TIMESTAMP)), 2) ||':' || udf_strzero(udf_int(extract(second from CAST(ADE.data AS TIMESTAMP))), 2) as HORA,		
+	udf_strzero(extract(day from CAST(udf_incday(ADE.DATA,ADE.DIAS_VALIDADE) as date)), 2) || '/' || udf_strzero(extract(month from CAST(udf_incday(ADE.DATA,ADE.DIAS_VALIDADE) as date)), 2) ||'/' || udf_strzero(udf_int(extract(year from CAST(udf_incday(ADE.DATA,ADE.DIAS_VALIDADE) as date))), 4) as VALIDADE,
+	ADE.NUMERO,
+	ADE.ANO,
+	ADE.DIAS_VALIDADE,
+	ADE.REFERENCIAL 
+from AAC_DOCUMENTOS_EMISSAO ADE
+where ADE.REFERENCIAL = :IdReferencial

@@ -1,0 +1,18 @@
+SELECT TRIM(A.NOME)           AS NOME                       
+     , TRIM(A.NOME_REDUZIDO)  AS NOME_REDUZIDO       
+     , TRIM(A.ENDERECO)       AS ENDERECO       
+     , TRIM(A.BAIRRO)         AS BAIRRO       
+     , A.CODIGO_MUNICIPIO  
+     , TRIM(B.NOME_MUNICIPIO) AS NOME_MUNICIPIO
+     , TRIM(B.UF)             AS UF       
+     , TRIM(A.CEP)            AS CEP       
+     , TRIM(A.TELEFONE)       AS TELEFONE       
+     , TRIM(A.FAX)            AS FAX       
+     , TRIM(A.EMAIL)          AS EMAIL       
+     , TRIM(A.SITE)           AS SITE       
+     , TRIM(A.CGC)            AS CNPJ                                      
+     , TRIM(A.SLOGAN)         AS SLOGAN       
+     , A.LOGOTIPO
+  FROM AAC_CLIENTES A
+       LEFT JOIN AAC_MUNICIPIOS B ON B.CODIGO_MUNICIPIO = A.CODIGO_MUNICIPIO
+  ROWS 1

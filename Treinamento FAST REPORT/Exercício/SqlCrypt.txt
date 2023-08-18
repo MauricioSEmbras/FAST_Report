@@ -1,0 +1,10 @@
+select CODIGO,REFCERTIDAO from ADE_CRYPT(
+:referencial,
+(select case when wcd.tipocert = 0 then 'CN' 
+      when wcd.tipocert = 1 then 'CP' 
+      when wcd.tipocert = 2 then 'CPN' else '' end                                                               
+  from	WEB_CERTIDAO_DEB('IPTU',:inscricao, -1, CAST(CURRENT_TIMESTAMP AS DATE)) WCD),
+1,
+'IPTU',
+-1,
+'')
